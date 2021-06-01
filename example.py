@@ -26,7 +26,8 @@ async def main():
     """Main"""
 
     """Session"""
-    VCO = session.VCO(TOKEN="")  # INPUT REQUIRED
+    # API_URL="https://vco-###.velocloud.net" - Replace ###'s
+    VCO = session.VCO(TOKEN="", API_URL="")  # INPUT REQUIRED
     LOGGER.info('VCO Session Created.')
 
     """Edge Model"""
