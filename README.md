@@ -13,7 +13,7 @@ This package currently supports VCO API v4.2.1.
 
 ## Usage
 You will need to create a VCO user with a valid API Token to use this package.
-See [example.py](velocloud/example.py)
+See [example.py](example.py)
 
 ## Caveats
 There is no support for building and creating Model objects from scratch (use at your own risk).  Models are strictly intended for mapping information pulled from the API.  This may or may not change over time.
