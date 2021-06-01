@@ -9,7 +9,7 @@ from velocloud.models.site import Site
 from velocloud.models.enterprise import Enterprise
 from velocloud.models.link import Link
 from velocloud.models.configuration import ConfigurationModule, ModelConfiguration
-from velocloud.orchestrator import error_handlers
+from velocloud import orchestrator
 
 
 LOGGER = logging.getLogger('velocloud.models.edge')
@@ -171,7 +171,7 @@ class EdgeProvision:
             if api_request.status != 200:
                 status = api_request.status
                 error_data = await api_request.json()
-                formatted_error = await error_handlers.format_error(status, error_data)
+                formatted_error = await orchestrator.error_handlers.format_error(status, error_data)
                 LOGGER.error(f'{self.name} [{self.edge_id}]: {formatted_error}')
                 raise Exception(f'{formatted_error.code}: {formatted_error.message}')
 
@@ -336,25 +336,15 @@ class Edge:
             tuple: Edge ID (int), New Activation Key (str), Key Expiration Date (str)
         """
         ENDPOINT = f'{BASE_ENDPOINT}/edgeRequestReactivation'
-        URL = f'{session.API_URL}{ENDPOINT}'
         BODY = {"edgeId": self.id}
 
         LOGGER.info(f'{self.name} [{self.id}]: Requesting reactivation...')
 
-        async with aiohttp.request('POST', URL, headers=session.get_headers(), json=BODY) as api_request:
-            if api_request.status != 200:
-                status = api_request.status
-                error_data = await api_request.json()
-                formatted_error = await error_handlers.format_error(status, error_data)
-                LOGGER.error(f'{self.name} [{self.id}]: {formatted_error.code}: {formatted_error.message}')
-                raise Exception(f'{self.name} [{self.id}]: {formatted_error.code}: {formatted_error.message}')
-
-            data = await api_request.json()
-            LOGGER.debug(data)
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
 
         LOGGER.info(f'{self.name} [{self.id}]: Reactivation request successful.')
 
-        return (BODY["edgeId"], data["activationKey"], data["activationKeyExpires"])
+        return (BODY["edgeId"], data.get("activationKey"), data.get("activationKeyExpires"))
 
     async def cancel_reactivation(self, session: VCO) -> bool:
         """Cancel Reactivation
@@ -368,35 +358,25 @@ class Edge:
             bool: Was the cancellation successful?
         """
         ENDPOINT = f'{BASE_ENDPOINT}/edgeCancelReactivation'
-        URL = f'{session.API_URL}{ENDPOINT}'
         BODY = {"edgeId": self.id}
 
         LOGGER.info(f'{self.name} [{self.id}]: Cancelling reactivation request...')
 
-        async with aiohttp.request('POST', URL, headers=session.get_headers(), json=BODY) as api_request:
-            if api_request.status != 200:
-                status = api_request.status
-                error_data = await api_request.json()
-                formatted_error = await error_handlers.format_error(status, error_data)
-                LOGGER.error(f'{self.name} [{self.id}]: {formatted_error}')
-                raise Exception(f'{formatted_error.code}: {formatted_error.message}')
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
 
-            data = await api_request.json()
-
-            if data.get('rows') == 1:
-                LOGGER.info(f'{self.name} [{self.id}]: Reactivation cancelled successfully.')
-                return True
-            else:
-                LOGGER.error(f'{self.name} [{self.id}]: Error cancelling reactivation (DEBUG for more info).')
-                LOGGER.debug(data)
+        if data.get('rows') == 1:
+            LOGGER.info(f'{self.name} [{self.id}]: Reactivation cancelled successfully.')
+            return True
+        else:
+            LOGGER.error(f'{self.name} [{self.id}]: Error cancelling reactivation (DEBUG for more info).')
+            LOGGER.debug(data)
 
         return False
 
-    async def remove(self, session: VCO) -> tuple:
-        """Delete/Remove
+    async def delete(self, session: VCO) -> tuple:
+        """Delete Edge
 
-        **CAUTION**
-        Removes the Edge completely.
+        WARNING: Removes the Edge completely.
 
         Args:
             session (VCO): Velocloud Orchestrator session
@@ -405,27 +385,18 @@ class Edge:
             tuple: Edge ID (int), status (bool)
         """
         ENDPOINT = f'{BASE_ENDPOINT}/deleteEdge'
-        URL = f'{session.API_URL}{ENDPOINT}'
         BODY = {"edgeId": self.id}
 
         LOGGER.info(f'{self.name} [{self.id}]: Removing edge...')
 
-        async with aiohttp.request('POST', URL, headers=session.get_headers(), json=BODY) as api_request:
-            if api_request.status != 200:
-                status = api_request.status
-                error_data = await api_request.json()
-                formatted_error = await error_handlers.format_error(status, error_data)
-                LOGGER.error(f'{self.name} [{self.id}]: {formatted_error}')
-                raise Exception(f'{formatted_error.code}: {formatted_error.message}')
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
 
-            data = await api_request.json()
-
-            if data[0].get('rows') == 1:
-                LOGGER.info(f'{self.name} [{self.id}]: Edge removed successfully.')
-                return (self.id, True)
-            else:
-                LOGGER.error(f'{self.name} [{self.id}]: Error removing edge (DEBUG for more info).')
-                LOGGER.debug(data)
+        if data[0].get('rows') == 1:
+            LOGGER.info(f'{self.name} [{self.id}]: Edge removed successfully.')
+            return (self.id, True)
+        else:
+            LOGGER.error(f'{self.name} [{self.id}]: Error removing edge (DEBUG for more info).')
+            LOGGER.debug(data)
 
         return (self.id, False)
 
@@ -556,6 +527,8 @@ class Edge:
     async def getEdge(session: VCO, name: str, extras: list = None):
         """Get Edge
 
+        WARNING: Refactor with new velocloud.orchestrator methods
+
         Args:
             session (VCO): A Velocloud Orchestrator Session object
             name (str): The specified edge name
@@ -566,20 +539,8 @@ class Edge:
             Edge: An edge object
         """
         ENDPOINT = f'{BASE_ENDPOINT}/getEdge'
-        URL = f'{session.API_URL}{ENDPOINT}'
         BODY = {"name": name}
         BODY["with"] = extras if extras is not None else None
 
-        async with aiohttp.request('POST', URL, headers=session.get_headers(), json=BODY) as api_request:
-            if api_request.status != 200:
-                status = api_request.status
-                error_data = await api_request.json()
-                formatted_error = await error_handlers.format_error(status, error_data)
-                LOGGER.error(formatted_error)
-                raise Exception(f'{formatted_error.code}: {formatted_error.message}')
-
-            data = await api_request.json()
-
-            LOGGER.debug(data)
-
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
         return Edge.from_dict(data)
