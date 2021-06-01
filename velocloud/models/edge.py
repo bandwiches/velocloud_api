@@ -428,7 +428,7 @@ class Edge:
     haPreviousState: HaState = None
     haSerialNumber: str = None
     haState: HaState = None
-    _id: int = None
+    id: int = None
     isLive: int = None
     lastContact: datetime = None  # Datetime
     logicalId: str = None
@@ -454,10 +454,6 @@ class Edge:
     def __repr__(self):
         return str(type(self))
 
-    @property
-    def edge_id(self):
-        return self._id
-
     async def reactivate(self, session: VCO) -> tuple:
         """Request Reactivation
 
@@ -471,22 +467,22 @@ class Edge:
         """
         ENDPOINT = f'{BASE_ENDPOINT}/edgeRequestReactivation'
         URL = f'{session.API_URL}{ENDPOINT}'
-        BODY = {"edgeId": self.edge_id}
+        BODY = {"edgeId": self.id}
 
-        LOGGER.info(f'{self.name} [{self.edge_id}]: Requesting reactivation...')
+        LOGGER.info(f'{self.name} [{self.id}]: Requesting reactivation...')
 
         async with aiohttp.request('POST', URL, headers=session.get_headers(), json=BODY) as api_request:
             if api_request.status != 200:
                 status = api_request.status
                 error_data = await api_request.json()
                 formatted_error = await error_handlers.format_error(status, error_data)
-                LOGGER.error(f'{self.name} [{self.edge_id}]: {formatted_error.code}: {formatted_error.message}')
-                raise Exception(f'{self.name} [{self.edge_id}]: {formatted_error.code}: {formatted_error.message}')
+                LOGGER.error(f'{self.name} [{self.id}]: {formatted_error.code}: {formatted_error.message}')
+                raise Exception(f'{self.name} [{self.id}]: {formatted_error.code}: {formatted_error.message}')
 
             data = await api_request.json()
             LOGGER.debug(data)
 
-        LOGGER.info(f'{self.name} [{self.edge_id}]: Reactivation request successful.')
+        LOGGER.info(f'{self.name} [{self.id}]: Reactivation request successful.')
 
         return (BODY["edgeId"], data["activationKey"], data["activationKeyExpires"])
 
@@ -503,25 +499,25 @@ class Edge:
         """
         ENDPOINT = f'{BASE_ENDPOINT}/edgeCancelReactivation'
         URL = f'{session.API_URL}{ENDPOINT}'
-        BODY = {"edgeId": self.edge_id}
+        BODY = {"edgeId": self.id}
 
-        LOGGER.info(f'{self.name} [{self.edge_id}]: Cancelling reactivation request...')
+        LOGGER.info(f'{self.name} [{self.id}]: Cancelling reactivation request...')
 
         async with aiohttp.request('POST', URL, headers=session.get_headers(), json=BODY) as api_request:
             if api_request.status != 200:
                 status = api_request.status
                 error_data = await api_request.json()
                 formatted_error = await error_handlers.format_error(status, error_data)
-                LOGGER.error(f'{self.name} [{self.edge_id}]: {formatted_error}')
+                LOGGER.error(f'{self.name} [{self.id}]: {formatted_error}')
                 raise Exception(f'{formatted_error.code}: {formatted_error.message}')
 
             data = await api_request.json()
 
             if data.get('rows') == 1:
-                LOGGER.info(f'{self.name} [{self.edge_id}]: Reactivation cancelled successfully.')
+                LOGGER.info(f'{self.name} [{self.id}]: Reactivation cancelled successfully.')
                 return True
             else:
-                LOGGER.error(f'{self.name} [{self.edge_id}]: Error cancelling reactivation (DEBUG for more info).')
+                LOGGER.error(f'{self.name} [{self.id}]: Error cancelling reactivation (DEBUG for more info).')
                 LOGGER.debug(data)
 
         return False
@@ -540,118 +536,151 @@ class Edge:
         """
         ENDPOINT = f'{BASE_ENDPOINT}/deleteEdge'
         URL = f'{session.API_URL}{ENDPOINT}'
-        BODY = {"edgeId": self.edge_id}
+        BODY = {"edgeId": self.id}
 
-        LOGGER.info(f'{self.name} [{self.edge_id}]: Removing edge...')
+        LOGGER.info(f'{self.name} [{self.id}]: Removing edge...')
 
         async with aiohttp.request('POST', URL, headers=session.get_headers(), json=BODY) as api_request:
             if api_request.status != 200:
                 status = api_request.status
                 error_data = await api_request.json()
                 formatted_error = await error_handlers.format_error(status, error_data)
-                LOGGER.error(f'{self.name} [{self.edge_id}]: {formatted_error}')
+                LOGGER.error(f'{self.name} [{self.id}]: {formatted_error}')
                 raise Exception(f'{formatted_error.code}: {formatted_error.message}')
 
             data = await api_request.json()
 
             if data[0].get('rows') == 1:
-                LOGGER.info(f'{self.name} [{self.edge_id}]: Edge removed successfully.')
-                return (self.edge_id, True)
+                LOGGER.info(f'{self.name} [{self.id}]: Edge removed successfully.')
+                return (self.id, True)
             else:
-                LOGGER.error(f'{self.name} [{self.edge_id}]: Error removing edge (DEBUG for more info).')
+                LOGGER.error(f'{self.name} [{self.id}]: Error removing edge (DEBUG for more info).')
                 LOGGER.debug(data)
 
-        return (self.edge_id, False)
+        return (self.id, False)
 
     @classmethod
     def from_dict(cls, profile: dict):
-        """Factory"""
-        INST = cls()
-        INST.activationKey = profile.get("activationKey")
+        """Edge Factory"""
+        # Datetimes
+        activationKeyExpires = None
+        activationTime = None
+        created = None
+        edgeStateTime = None
+        haLastContact = None
+        lastContact = None
+        modified = None
+        serviceUpSince = None
+        softwareUpdated = None
+        systemUpSince = None
+        # Extras
+        configuration = None
+        enterprise = None
+        links = []
+        recentLinks = []
+        site = None
+
+        # Datetime's
         try:
-            INST.activationKeyExpires = datetime.strptime(profile["activationKeyExpires"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            activationKeyExpires = datetime.strptime(profile["activationKeyExpires"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.activationState = ActivationState(profile.get("activationState"))
         try:
-            INST.activationTime = datetime.strptime(profile["activationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            activationTime = datetime.strptime(profile["activationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.alertsEnabled = profile.get("alertsEnabled")
-        INST.buildNumber = profile.get("buildNumber")
         try:
-            INST.created = datetime.strptime(profile["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            created = datetime.strptime(profile["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.customInfo = profile.get("customInfo")
-        INST.description = profile.get("description")
-        INST.deviceFamily = profile.get("deviceFamily")
-        INST.deviceId = profile.get("deviceId")
-        INST.dnsName = profile.get("dnsName")
-        INST.edgeState = profile.get("edgeState")
         try:
-            INST.edgeStateTime = datetime.strptime(profile["edgeStateTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            edgeStateTime = datetime.strptime(profile["edgeStateTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.endpointPkiMode = EndpointPkiMode(profile.get('endpointPkiMode'))
-        INST.enterpriseId = profile.get('enterpriseId')
-        INST.factorySoftwareVersion = profile.get('factorySoftwareVersion')
-        INST.factoryBuildNumber = profile.get('factoryBuildNumber')
-        # HA
         try:
-            INST.haLastContact = datetime.strptime(profile["haLastContact"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            haLastContact = datetime.strptime(profile["haLastContact"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.haPreviousState = str(profile["haPreviousState"]) if profile["haPreviousState"] else None
-        INST.haSerialNumber = str(profile["haSerialNumber"]) if profile["haSerialNumber"] else None
-        INST.haState = HaState(profile.get('haState'))
-        INST._id = (profile.get('id'))
-        LOGGER.info(profile.get('id'))
-        INST.isLive = profile.get("isLive")
         try:
-            INST.lastContact = datetime.strptime(profile["lastContact"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            lastContact = datetime.strptime(profile["lastContact"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.logicalId = profile.get("logicalId")
-        INST.modelNumber = profile.get("modelNumber")
         try:
-            INST.modified = datetime.strptime(profile["modified"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            modified = datetime.strptime(profile["modified"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.name = profile.get("name")
-        INST.operatorAlertsEnabled = profile.get("operatorAlertsEnabled")
-        INST.selfMacAddress = profile.get("selfMacAddress")
-        INST.serialNumber = profile.get("serialNumber")
-        INST.serviceState = ServiceState(profile.get('serviceState'))
         try:
-            INST.serviceUpSince = datetime.strptime(profile["serviceUpSince"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            serviceUpSince = datetime.strptime(profile["serviceUpSince"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.siteId = profile.get("siteId")
         try:
-            INST.softwareUpdated = datetime.strptime(profile["softwareUpdated"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            softwareUpdated = datetime.strptime(profile["softwareUpdated"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.softwareVersion = profile.get("softwareVersion")
         try:
-            INST.systemUpSince = datetime.strptime(profile["systemUpSince"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            systemUpSince = datetime.strptime(profile["systemUpSince"], "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
+
         # Extras
         if 'configuration' in profile.keys():
-            INST.configuration = ModelConfiguration.from_dict(profile["configuration"])
+            configuration = ModelConfiguration.from_dict(profile["configuration"])
         if 'enterprise' in profile.keys():
-            INST.enterprise = Enterprise.from_dict(profile["enterprise"])
+            enterprise = Enterprise.from_dict(profile["enterprise"])
         if 'links' in profile.keys():
             for edge_link in profile["links"]:
-                INST.links.append(Link.from_dict(edge_link))
+                links.append(Link.from_dict(edge_link))
         if 'recentLinks' in profile.keys():
             for edge_link in profile["recentLinks"]:
-                INST.recentLinks.append(Link.from_dict(edge_link))
+                recentLinks.append(Link.from_dict(edge_link))
         if 'site' in profile.keys():
-            INST.site = Site.from_dict(profile["site"])
+            site = Site.from_dict(profile["site"])
 
-        return INST
+        return cls(
+            activationKey=profile.get("activationKey"),
+            activationKeyExpires=activationKeyExpires,
+            activationState=ActivationState(profile.get("activationState")),
+            activationTime=activationTime,
+            alertsEnabled=profile.get("alertsEnabled"),
+            buildNumber=profile.get("buildNumber"),
+            created=created,
+            customInfo=profile.get("customInfo"),
+            description=profile.get("description"),
+            deviceFamily=profile.get("deviceFamily"),
+            deviceId=profile.get("deviceId"),
+            dnsName=profile.get("dnsName"),
+            edgeState=profile.get("edgeState"),
+            edgeStateTime=edgeStateTime,
+            endpointPkiMode=EndpointPkiMode(profile.get('endpointPkiMode')),
+            enterpriseId=profile.get('enterpriseId'),
+            factorySoftwareVersion=profile.get('factorySoftwareVersion'),
+            factoryBuildNumber=profile.get('factoryBuildNumber'),
+            haLastContact=haLastContact,
+            haPreviousState=str(profile["haPreviousState"]) if profile["haPreviousState"] else None,
+            haSerialNumber=str(profile["haSerialNumber"]) if profile["haSerialNumber"] else None,
+            haState=HaState(profile.get('haState')),
+            id=(profile.get('id')),
+            isLive=profile.get("isLive"),
+            lastContact=lastContact,
+            logicalId=profile.get("logicalId"),
+            modelNumber=profile.get("modelNumber"),
+            modified=modified,
+            name=profile.get("name"),
+            operatorAlertsEnabled=profile.get("operatorAlertsEnabled"),
+            selfMacAddress=profile.get("selfMacAddress"),
+            serialNumber=profile.get("serialNumber"),
+            serviceState=ServiceState(profile.get('serviceState')),
+            serviceUpSince=serviceUpSince,
+            siteId=profile.get("siteId"),
+            softwareUpdated=softwareUpdated,
+            softwareVersion=profile.get("softwareVersion"),
+            systemUpSince=systemUpSince,
+            configuration=configuration,
+            enterprise=enterprise,
+            links=links,
+            recentLinks=recentLinks,
+            site=site
+        )
 
     @staticmethod
     async def getEdge(session: VCO, name: str, extras: list = None):
