@@ -7,6 +7,7 @@ from typing import List
 from velocloud.models.session import VCO
 from velocloud.models.site import Site
 from velocloud.models.enterprise import Enterprise
+from velocloud.models.link import Link
 from velocloud.models.configuration import ConfigurationModule, ModelConfiguration
 from velocloud.orchestrator import error_handlers
 
@@ -84,55 +85,6 @@ class ServiceState(Enum):
     IN_SERVICE = "IN_SERVICE"
     OUT_OF_SERVICE = "OUT_OF_SERVICE"
     PENDING_SERVICE = "PENDING_SERVICE"
-
-
-class LinkState(Enum):
-    """Link State (v4.2.1)"""
-    UNKNOWN = "UNKNOWN"
-    STABLE = "STABLE"
-    UNSTABLE = "UNSTABLE"
-    DISCONNECTED = "DISCONNECTED"
-    QUIET = "QUIET"
-    INITIAL = "INITIAL"
-    STANDBY = "STANDBY"
-
-
-class NetworkSide(Enum):
-    """Network Side (v4.2.1)"""
-    UNKNOWN = "UNKNOWN"
-    UNKOWN = "UNKOWN"  # API Typo
-    WAN = "WAN"
-    LAN = "LAN"
-
-
-class NetworkType(Enum):
-    """Network Type (v4.2.1)"""
-    UNKNOWN = "UNKNOWN"
-    WIRELESS = "WIRELESS"
-    ETHERNET = "ETHERNET"
-    WIFI = "WIFI"
-
-
-class BackupState(Enum):
-    """Backup State (v4.2.1)"""
-    UNCONFIGURED = "UNCONFIGURED"
-    STANDBY = "STANDBY"
-    ACTIVE = "ACTIVE"
-
-
-class LinkMode(Enum):
-    """Link Mode (v4.2.1)"""
-    ACTIVE = "ACTIVE"
-    BACKUP = "BACKUP"
-    HOSTSTASNDBY = "HOSTSTANDBY"
-
-
-class ServiceGroups(Enum):
-    """Service Groups (v4.2.1)"""
-    ALL = "ALL"
-    PRIVATE_WIRED = "PRIVATE_WIRED"
-    PUBLIC_WIRED = "PUBLIC_WIRED"
-    PUBLIC_WIRELESS = "PUBLIC_WIRELESS"
 
 
 """
@@ -322,90 +274,8 @@ class EdgeConfigurationStack:
 
 
 @dataclass
-class Link:
-    """Link
-
-    WARNING: May be moved (TBD)
-    """
-    id: int = None
-    created: datetime = None  # Datetime
-    edgeId: int = None
-    logicalId: str = None
-    internalId: str = None
-    interface: str = None
-    macAddress: str = None
-    ipAddress: str = None
-    netmask: str = None
-    networkSide: NetworkSide = None
-    networkType: NetworkType = None
-    displayName: str = None
-    isp: str = None
-    org: str = None
-    lat: float = None
-    lon: float = None
-    lastActive: datetime = None  # Datetime
-    state: LinkState = None
-    backupState: BackupState = None
-    linkMode: LinkMode = None
-    vpnState: str = None  # Depracated - do not use
-    lastEvent: datetime = None  # Datetime
-    lastEventState: LinkState = None
-    alertsEnabled: int = None
-    operatorAlertsEnabled: int = None
-    serviceState: ServiceState = None
-    modified: datetime = None  # Datetime
-    serviceGroups: List[ServiceGroups] = field(default_factory=list)
-
-    def __repr__(self):
-        return str(type(self))
-
-    @classmethod
-    def from_dict(cls, profile: dict):
-        """Edge Link Factory"""
-        inst = cls()
-        inst.id = profile.get("id")
-        try:
-            inst.created = datetime.strptime(profile["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        except ValueError:
-            pass
-        inst.edgeId = profile.get("edgeId")
-        inst.logicalId = profile.get("logicalId")
-        inst.internalId = profile.get("internalId")
-        inst.interface = profile.get("interface")
-        inst.macAddress = profile.get("macAddress")
-        inst.ipAddress = profile.get("ipAddress")
-        inst.netmask = profile.get("netmask")
-        inst.networkSide = NetworkSide(profile.get('networkSide'))
-        inst.networkType = NetworkType(profile.get('networkType'))
-        inst.displayName = profile.get("displayName")
-        inst.isp = profile.get("isp")
-        inst.org = profile.get("org")
-        inst.lat = profile.get("lat")
-        inst.lon = profile.get("lon")
-        try:
-            inst.lastActive = datetime.strptime(profile["lastActive"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        except ValueError:
-            pass
-        inst.state = LinkState(profile.get('state'))
-        inst.backupState = BackupState(profile.get('backupState'))
-        inst.linkMode = LinkMode(profile.get('linkMode'))
-        inst.vpnState = profile.get("vpnState")
-        inst.lastEvent = profile.get("lastEvent")
-        inst.lastEventState = LinkState(profile.get('lastEventState'))
-        inst.alertsEnabled = profile.get("alertsEnabled")
-        inst.operatorAlertsEnabled = profile.get("operatorAlertsEnabled")
-        inst.serviceState = ServiceState(profile.get('serviceState'))
-        try:
-            inst.modified = datetime.strptime(profile["modified"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        except ValueError:
-            pass
-        inst.serviceGroups = profile.get("serviceGroups")
-        return inst
-
-
-@dataclass
 class Edge:
-    """ Edge """
+    """ Edge (v4.2.1)"""
     activationKey: str = None
     activationKeyExpires: datetime = None  # Datetime
     activationState: ActivationState = None
