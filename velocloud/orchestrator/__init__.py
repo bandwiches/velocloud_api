@@ -65,29 +65,22 @@ async def format_error(status: int, data: dict) -> error.Error:
     return e
 
 
-async def send(SESSION: VCO, ENDPOINT: str, extras: list = None, **kwargs) -> dict:
+async def send(session: VCO, endpoint: str, body: dict = None) -> dict:
     """Get Edge
 
-    A general purpose API Caller.
-    VCO supports extra information via "extras" (for example: 'with')
-    Some endpoints require additional information such as name (edge's), provide that with kwargs.
+    A general purpose API caller.
 
     Args:
         SESSION (VCO): A Velocloud Orchestrator Session object
         ENDPOINT (str): The specified endpoint
-        extras (list): Optional Extras (with)
-        **kwargs:
-            name (str): Edge name
-            with (list): Optional - recentLinks, links, serviceGroups, site, enterprise, configuration, configurationWithModules
+        BODY (dict): The HTTP POST Body
 
     Returns:
         (dict): API results
     """
-    URL = f'{SESSION.API_URL}{ENDPOINT}'
-    BODY = {}
-    BODY["with"] = extras if extras is not None else None
+    URL = f'{session.API_URL}{endpoint}'
 
-    async with aiohttp.request('POST', URL, headers=SESSION.get_headers(), json=BODY) as api_request:
+    async with aiohttp.request('POST', URL, headers=session.get_headers(), json=body) as api_request:
         if api_request.status != 200:
             status = api_request.status
             error_data = await api_request.json()
