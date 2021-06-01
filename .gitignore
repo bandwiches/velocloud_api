@@ -1,0 +1,19 @@
+# DEV
+__pycache__/
+*.log
+*.logs
+.vscode/
+*.code-workspace
+venv/
+*.egg-info
+test_example.py
+.pytest_cache/
+.todo
+dev_example.py
+
+# Refactoring
+velocloud/orchestrator/edge.py
+velocloud/orchestrator/enterprise.py
+
+# Non-Package Stuff
+velocloud/reports/
