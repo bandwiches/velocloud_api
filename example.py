@@ -9,7 +9,7 @@ Why?
     Nothing really exists today.
 """
 import asyncio
-from velocloud.models import edge, enterprise, session
+from velocloud.models import edge, session
 import logging
 
 
@@ -38,10 +38,14 @@ async def main():
     print(f'Name: {e.name}\nID: {e.edge_id}')
     await asyncio.sleep(2)
 
-    """Enterprise Model"""
-    # Retrieve Enterprise
-    ent = await enterprise.Enterprise.getEnterprise(VCO)
-    LOGGER.info(ent)
+    # Request Reactivation
+    reactivate = await e.reactivate(VCO)  # Edge must be in a valid state
+    print(reactivate)
+    await asyncio.sleep(2)
+
+    # Cancel Reactivation
+    await e.cancel_reactivation(VCO)  # Edge must be in a valid state
+    await asyncio.sleep(2)
 
 
 if __name__ == "__main__":
