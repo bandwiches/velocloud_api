@@ -255,19 +255,6 @@ class EdgeDeleteEdgeBGPNeighborRecordsResult:
 
 
 @dataclass
-class EdgeDeleteEdgeResultItem:
-    rows: int
-    id: int = None
-    error: str = None
-
-
-@dataclass
-class EdgeCancelReactivationResult:
-    rows: int
-    error: str = None
-
-
-@dataclass
 class EdgeProvisionResult:
     id: int
     activationKey: str
@@ -278,29 +265,6 @@ class EdgeProvisionResult:
         'privateKeyPassword': None,
         'csr': None
     }
-
-
-@dataclass
-class EdgeRequestReactivationResult:
-    activationKey: str
-    activationKeyExpires: datetime
-
-
-@dataclass
-class EdgeGetEdgeConfigurationStackResultItem:
-    created: datetime
-    description: str
-    id: int
-    modified: datetime
-    modules: List[ConfigurationModule]
-    name: str
-    version: str
-    configurationType: ConfigurationType = None
-    edgeCount: int = None
-    effective: datetime = None
-    logicalId: str = None
-    schemaVersion: str = None
-    isStaging: int = None
 
 
 @dataclass

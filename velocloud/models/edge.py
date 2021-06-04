@@ -8,7 +8,7 @@ from velocloud.models.session import VCO
 from velocloud.models.site import Site
 from velocloud.models.enterprise import Enterprise
 from velocloud.models.link import Link
-from velocloud.models.configuration import ConfigurationModule, ModelConfiguration
+from velocloud.models.configuration import ConfigurationModule, ConfigurationType, ModelConfiguration
 from velocloud import orchestrator
 
 
@@ -34,6 +34,11 @@ class AnalyticsMode(Enum):
     SDWAN_ONLY = 'SDWAN_ONLY'
     SDWAN_ANALYTICS = 'SDWAN_ANALYTICS'
     ANALYTICS_ONLY = 'ANALYTICS_ONLY'
+
+
+class EdgeClientVisibilityMode(Enum):
+    MAC = "MAC"
+    IP = "IP"
 
 
 class EdgeState(Enum):
@@ -80,6 +85,12 @@ class ModelNumber(Enum):
     virtual = 'virtual'
 
 
+class PeerType(Enum):
+    BRANCH = "BRANCH"
+    HUB = "HUB"
+    GATEWAY = "GATEWAY"
+
+
 class ServiceState(Enum):
     """Service State (v4.2.1)"""
     IN_SERVICE = "IN_SERVICE"
@@ -88,7 +99,90 @@ class ServiceState(Enum):
 
 
 """
-    Dataclasses
+    Query Results
+"""
+
+
+@dataclass
+class EdgeDeleteEdgeResultItem:
+    rows: int
+    id: int = None
+    error: str = None
+
+
+@dataclass
+class EdgeRequestReactivationResult:
+    activationKey: str
+    activationKeyExpires: datetime
+
+
+@dataclass
+class EdgeCancelReactivationResult:
+    rows: int
+    error: str = None
+
+
+@dataclass
+class EdgeClientVisibilityModeResult:
+    edgeClientVisibilityMode: EdgeClientVisibilityMode
+
+
+@dataclass
+class EdgeConfigurationModulesResult:
+    """This is not standard"""
+    deviceSettings: dict
+    firewall: dict
+    qos: dict
+    wan: dict
+    controlPlane: dict
+    managementPlane: dict
+    imageUpdate: dict
+
+
+@dataclass
+class EdgeConfigurationStackResultItem:
+    created: datetime
+    description: str
+    id: int
+    modified: datetime
+    modules: List[ConfigurationModule]
+    name: str
+    version: str
+    configurationType: ConfigurationType = None
+    edgeCount: int = None
+    effective: datetime = None
+    logicalId: str = None
+    schemaVersion: str = None
+    isStaging: int = None
+
+
+@dataclass
+class EdgeConfigurationStackResult:
+    items: List[EdgeConfigurationStackResultItem]
+
+
+@dataclass
+class EdgeSdwanPeersResultItem:
+    """This is not standard"""
+    edgeLogicalId: str = None
+    deviceLogicalid: str = None
+    peerName: str = None
+    description: str = None
+    peerType: PeerType = None
+    scoreAfterVoice: float = None
+    scoreAfterVideo: float = None
+    scoreAfterTrans: float = None
+    pathStatusCount: dict = None
+    pathQoe: float = None
+
+
+@dataclass
+class EdgeSdwanPeersResult:
+    items: List[EdgeSdwanPeersResultItem]
+
+
+"""
+    Usable Objects
 """
 
 
@@ -117,6 +211,13 @@ class EdgeProvision:
     edgeLicenseId: int = None
     customInfo: str = None
     analyticsMode: AnalyticsMode = None
+
+    def __repr__(self):
+        return str(type(self))
+
+    @classmethod
+    def from_dict(cls, profile: dict):
+        return None
 
     async def provision(self, session: VCO) -> dict:
         """Provision
@@ -324,82 +425,6 @@ class Edge:
     def __repr__(self):
         return str(type(self))
 
-    async def reactivate(self, session: VCO) -> tuple:
-        """Request Reactivation
-
-        Requests a new activation key and updates the Edge state to REACTIVATION_PENDING.
-
-        Args:
-            session (VCO): A Velocloud Orchestrator Session
-
-        Returns:
-            tuple: Edge ID (int), New Activation Key (str), Key Expiration Date (str)
-        """
-        ENDPOINT = f'{BASE_ENDPOINT}/edgeRequestReactivation'
-        BODY = {"edgeId": self.id}
-
-        LOGGER.info(f'{self.name} [{self.id}]: Requesting reactivation...')
-
-        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
-
-        LOGGER.info(f'{self.name} [{self.id}]: Reactivation request successful.')
-
-        return (BODY["edgeId"], data.get("activationKey"), data.get("activationKeyExpires"))
-
-    async def cancel_reactivation(self, session: VCO) -> bool:
-        """Cancel Reactivation
-
-        Removes the reactivation key and resets the edge state from PENDING_REACTIVATION
-
-        Args:
-            session (VCO): Velocloud Orchestrator session
-
-        Returns:
-            bool: Was the cancellation successful?
-        """
-        ENDPOINT = f'{BASE_ENDPOINT}/edgeCancelReactivation'
-        BODY = {"edgeId": self.id}
-
-        LOGGER.info(f'{self.name} [{self.id}]: Cancelling reactivation request...')
-
-        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
-
-        if data.get('rows') == 1:
-            LOGGER.info(f'{self.name} [{self.id}]: Reactivation cancelled successfully.')
-            return True
-        else:
-            LOGGER.error(f'{self.name} [{self.id}]: Error cancelling reactivation (DEBUG for more info).')
-            LOGGER.debug(data)
-
-        return False
-
-    async def delete(self, session: VCO) -> tuple:
-        """Delete Edge
-
-        WARNING: Removes the Edge completely.
-
-        Args:
-            session (VCO): Velocloud Orchestrator session
-
-        Returns:
-            tuple: Edge ID (int), status (bool)
-        """
-        ENDPOINT = f'{BASE_ENDPOINT}/deleteEdge'
-        BODY = {"edgeId": self.id}
-
-        LOGGER.info(f'{self.name} [{self.id}]: Removing edge...')
-
-        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
-
-        if data[0].get('rows') == 1:
-            LOGGER.info(f'{self.name} [{self.id}]: Edge removed successfully.')
-            return (self.id, True)
-        else:
-            LOGGER.error(f'{self.name} [{self.id}]: Error removing edge (DEBUG for more info).')
-            LOGGER.debug(data)
-
-        return (self.id, False)
-
     @classmethod
     def from_dict(cls, profile: dict):
         """Edge Factory"""
@@ -522,6 +547,177 @@ class Edge:
             recentLinks=recentLinks,
             site=site
         )
+
+    async def reactivate(self, session: VCO) -> EdgeRequestReactivationResult:
+        """Request Reactivation (v4.2.1)
+
+        Requests a new activation key and updates the Edge state to REACTIVATION_PENDING.
+
+        Args:
+            session (VCO): A Velocloud Orchestrator Session
+
+        Returns:
+            EdgeRequestReactivationResult: New Activation Key & Expiration Date
+        """
+        ENDPOINT = f'{BASE_ENDPOINT}/edgeRequestReactivation'
+        BODY = {"enterpriseId": self.enterpriseId, "edgeId": self.id}
+        RESULTS = None
+
+        LOGGER.info(f'{self.name} [{self.id}]: Requesting reactivation.')
+
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
+
+        RESULTS = EdgeRequestReactivationResult(
+            activationKey=data.get("activationKey"),
+            activationKeyExpires=datetime.strptime(data.get("activationKeyExpires"), "%Y-%m-%dT%H:%M:%S.%fZ")
+        )
+
+        self.activationKey = RESULTS.activationKey
+        self.activationKeyExpires = RESULTS.activationKeyExpires
+
+        return RESULTS
+
+    async def cancel_reactivation(self, session: VCO) -> EdgeCancelReactivationResult:
+        """Cancel Reactivation
+
+        Removes the reactivation key and resets the edge state from PENDING_REACTIVATION
+
+        Args:
+            session (VCO): Velocloud Orchestrator session
+
+        Returns:
+            EdgeCancelReactivationResult: Rows & Errors (if applicable)
+        """
+        ENDPOINT = f'{BASE_ENDPOINT}/edgeCancelReactivation'
+        BODY = {"enterpriseId": self.enterpriseId, "edgeId": self.id}
+
+        LOGGER.info(f'{self.name} [{self.id}]: Cancelling reactivation request.')
+
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
+
+        return EdgeCancelReactivationResult(rows=data.get("rows"), error=data.get("error"))
+
+    async def delete(self, session: VCO) -> EdgeDeleteEdgeResultItem:
+        """Delete Edge (untested)
+
+        WARNING: Removes the Edge completely.
+
+        Args:
+            session (VCO): Velocloud Orchestrator session
+
+        Returns:
+            tuple: Edge ID (int), status (bool)
+        """
+        ENDPOINT = f'{BASE_ENDPOINT}/deleteEdge'
+        BODY = {
+            "enterpriseId": self.enterpriseId,
+            "id": self.id
+        }
+
+        LOGGER.info(f'{self.name} [{self.id}]: Removing edge...')
+
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
+        return EdgeDeleteEdgeResultItem(
+            data[0].get('rows'),
+            data[0].get('id'),
+            data[0].get('error')
+        )
+
+    async def delete_bgp_neighbor_records(self, session: VCO):
+        return None
+
+    async def get_client_visibility_mode(self, session: VCO) -> EdgeClientVisibilityModeResult:
+        """Get Client Visibility Mode"""
+        ENDPOINT = ""
+        BODY = {}
+
+        LOGGER.INFO(f'{self.name} [{self.id}]: Getting client visibility mode.')
+
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
+
+        return EdgeClientVisibilityModeResult(EdgeClientVisibilityMode(data.get("edgeClientVisibilityMode")))
+
+    async def get_edge_configuration_modules(self, session: VCO, modules: list) -> EdgeConfigurationModulesResult:
+        """Get Edge Configuration Modules"""
+        # This needs to be rewritten, the whole thing (including EdgeConfigurationModulesResult)
+        return None
+
+    async def get_edge_configuration_stack(self, session: VCO) -> EdgeConfigurationStackResult:
+        """Get Edge Configuration Stack
+        Gets the complete configuration profile (including all modules).
+        """
+        # This needs to be rewritten, the whole thing (including EdgeConfigurationStackResult)
+        return None
+
+    async def get_edge_sdwan_peers(self, session: VCO, filters: dict, interval: dict) -> EdgeSdwanPeersResult:
+        """Get Edge SDWAN Peers
+        Get's the SD-WAN peers that have established paths.int
+
+        (Optional) use a filter object to limit the number of SD-WAN peers returned.
+        (Optional) specify a time interval with an interval object [default: current date]
+        """
+        # This needs to be rewritten, the whole thing (including EdgeConfigurationStackResult)
+        # Filters & Interval are custom objects, the API docs are blank for these
+        return None
+
+    async def set_edge_enterprise_configuration(self, session: VCO):
+        return None
+
+    async def set_edge_handoff_gateways(self, session: VCO):
+        # is handoff one word?  i think so
+        return None
+
+    async def set_edge_operator_configuration(self, session: VCO):
+        return None
+
+    async def unset_edge_operator_configuration(self, session: VCO):
+        return None
+
+    async def update_edge_admin_password(self, session: VCO):
+        return None
+
+    async def update_edge_attributes(self, session: VCO):
+        return None
+
+    async def update_edge_credentials_by_configuration(self, session: VCO):
+        return None
+
+    @staticmethod
+    async def delete_edges(session: VCO, enterpriseId: int, edgeIds: list) -> list:
+        """Delete All Edges (untested)
+
+        WARNING: This will be depracated in a future update.
+        WARNING: This will remove all the edges supplied from VCO.
+        INFO: Static Method
+
+        Args:
+            session (VCO): Velocloud Session Object
+            enterpriseId (int): Enterprise ID
+            edgeIds (list): A list of Edge ID's as int
+
+        Returns:
+            list(EdgeDeleteEdgeResultItem): A list of EdgeDeleteEdgeResultItem's
+        """
+        ENDPOINT = f'{BASE_ENDPOINT}/deleteEdge'
+        BODY = {
+            "enterpriseId": enterpriseId,
+            "ids": edgeIds
+        }
+        RESULTS = []
+
+        LOGGER.info(f'[{enterpriseId}] Removing Edges: {edgeIds}')
+
+        data = await orchestrator.send(session=session, endpoint=ENDPOINT, body=BODY)
+
+        for result in data:
+            RESULTS.append(
+                EdgeDeleteEdgeResultItem(
+                    rows=result.get('rows'),
+                    id=result.get('id'),
+                    error=result.get('error')
+                )
+            )
+        return RESULTS
 
     @staticmethod
     async def getEdge(session: VCO, name: str, extras: list = None):

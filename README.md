@@ -8,8 +8,11 @@ A async package for interacting with Velocloud Orchestrator.
 |[Caveats](#Caveats)|
 
 ## VCO API Version Support
-This package currently supports VCO API v4.2.1.
 **This package currently supports token authentication ONLY.**
+|VCO API|Support|
+|---|---|
+|v4.3.0|Not Tested|
+|v4.2.1|Passing|
 
 ## Usage
 You will need to create a VCO user with a valid API Token to use this package.

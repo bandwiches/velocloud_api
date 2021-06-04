@@ -10,6 +10,7 @@ test_example.py
 .pytest_cache/
 .todo
 dev_example.py
+.vco_4.3.0_changelog.txt
 
 # Refactoring
 velocloud/orchestrator/edge.py
