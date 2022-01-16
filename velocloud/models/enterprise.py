@@ -1,86 +1,28 @@
 import aiohttp
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
 import logging
 from typing import List
 from velocloud.models.session import VCO
-from velocloud.models.configuration import ConfigurationType, ConfigurationModule
 from velocloud.orchestrator import error_handlers
+from velocloud.models.enums import configurationModuleType, endpointPkiMode, tinyint
 
 
 LOGGER = logging.getLogger('velocloud.models.enterprise')
 BASE_ENDPOINT = '/portal/rest/enterprise'
 
 
-"""Enums"""
-
-
-class ProxyType(Enum):
-    PARTNER = "PARTNER"
-    MSP = "MSP"
-
-
 """Dataclasses"""
 
 
 @dataclass
-class AuthObject:
-    username: str
-    password: str
-    email: str = None
-    password2: str = None
-
-    def __repr__(self):
-        return str(type(self))
-
-    @classmethod
-    def from_dict(cls, profile: dict):
-        """Factory Method"""
-        INST = cls()
-        INST.username = profile.get('username')
-        INST.password = profile.get('password')
-        INST.email = profile.get('email')
-        INST.password2 = profile.get('password2')
-
-        return INST
-
-
-@dataclass
-class EnterpriseAlertNotificationUserData:
-    email: str
-    emailEnabled: int
-    enabled: int
-    enterpriseUserId: int
-    mobileEnabled: int
-    mobilePhone: str
-    smsEnabled: int
-    username: str
-
-
-@dataclass
-class EnterpriseAlertNotification:
-    id: int = None
-    enterpriseAlertTriggerId: int = None
-    enterpriseId: int = None
-    created: str = None
-    enterpriseUserList: List[EnterpriseAlertNotificationUserData] = field(default_factory=list)
-    smsEnabled: int = None
-    smsList: str = None
-    smsText: str = None
-    emailenabled: int = None
-    emailList: str = None
-    emailText: str = None
-    mobileenabled: int = None
-    mobileList: str = None
-    mobileText: str = None
-    snmpEnabled: int = None
-    snmpList: str = None
-    modified: str = None
-
-
-@dataclass
 class EnterpriseConfigurationItem:
+    """Enterprise Configuration Item
+    This is a custom class.
+
+    This was created originally as a quick response from the API.
+    This needs to be reviewed and rewritten.
+    """
     created: datetime = None
     description: str = None
     effective: datetime = None
@@ -88,7 +30,7 @@ class EnterpriseConfigurationItem:
     modified: datetime = None
     name: str = None
     version: str = None
-    configurationType: ConfigurationType = None
+    configurationType: configurationModuleType = None
     edgeCount: int = None
     logicalId: str = None
     modules: List[ConfigurationModule] = field(default_factory=list)
@@ -114,7 +56,7 @@ class EnterpriseConfigurationItem:
         INST.modified = datetime.strptime(profile["modified"], "%Y-%m-%dT%H:%M:%S.%fZ")
         INST.name = profile.get('name')
         INST.version = profile.get('version')
-        INST.configurationType = ConfigurationType(profile.get('configurationType'))
+        INST.configurationType = configurationModuleType(profile.get('configurationType'))
         INST.edgeCount = profile.get('edgeCount')
         INST.logicalId = profile.get('logicalId')
         if 'modules' in profile.keys():
@@ -130,108 +72,36 @@ class EnterpriseConfigurationItem:
 
 
 @dataclass
-class EnterpriseProxy:
-    _id: int
-    created: datetime
-    networkId: int
-    proxyType: ProxyType
-    operateGateways: bool
-    logicalId: str
-    name: str
-    domain: str
-    prefix: str
-    description: str
-    contactname: str
-    contactPhone: str
-    contactMobile: str
-    contactEmail: str
-    streetAddress: str
-    streetAddress2: str
-    city: str
-    state: str
-    postalCode: str
-    lat: float
-    lon: float
-    modified: datetime
-
-    def __repr__(self):
-        return str(type(self))
-
-    @property
-    def enterprise_proxy_id(self):
-        return self._id
-
-
-@dataclass
-class EnterpriseBase:
-    _id: int
-    created: datetime
-    operatorId: int
-    networkId: int
-    entepriseId: int
-    edgeid: int
-    gatewayId: int
-    parentGroupId: int
-    description: str
-    object: str
-    name: str
-    type: str
-    logicalId: str
-    alertsEnabled: int
-    operatorAlertsEnabled: int
-    status: str
-    statusModified: datetime
-    previousData: dict
-    previousCreated: datetime
-    draftData: str
-    draftCreated: datetime
-    draftComment: str
-    data: dict
-    lastContact: datetime
-    version: str
-    modified: str
-
-    def __repr__(self):
-        return str(type(self))
-
-    @property
-    def enterprise_id(self):
-        return self._id
-
-
-@dataclass
-class Enterprise(EnterpriseBase):
-    _id: int
-    created: datetime  # Datetime
-    name: str
-    logicalId: str
-    contactName: str
-    contactPhone: str
-    contactMobile: str
-    contactEmail: str
-    streetAddress: str
-    streetAddress2: str
-    city: str
-    state: str
-    postalCode: str
-    country: str
-    lat: float
-    lon: float
-    timezone: str
-    locale: str
-    shippingSameAsLocation: int
-    shippingContactName: str
-    shippingAddress: str
-    shippingAddress2: str
-    shippingCity: str
-    shippingState: str
-    shippingCountry: str
-    shippingPostalCode: str
-    modified: datetime
-    gatewayPoolId: int
-    networkId: int
-    returnData: bool
-    user: AuthObject = None
+class Enterprise:
+    """Enterprise"""
+    id: int = None
+    created: datetime = None  # datetime
+    networkId: int = None
+    gatewayPoolId: int = None
+    alertsEnabled: tinyint = None
+    operatorAlertsEnabled: tinyint = None
+    endpointPkiMode: endpointPkiMode = None
+    name: str = None
+    domain: str = None
+    prefix: str = None
+    logicalId: str = None
+    accountNumber: str = None
+    description: str = None
+    contactName: str = None
+    contactPhone: str = None
+    contactMobile: str = None
+    contactEmail: str = None
+    streetAddress: str = None
+    streetAddress2: str = None
+    city: str = None
+    state: str = None
+    postalCode: str = None
+    country: str = None
+    lat: float = None
+    lon: float = None
+    timezone: str = None
+    locale: str = None
+    modified: datetime = None  # datetime
 
     def __repr__(self):
         return str(type(self))
@@ -249,8 +119,17 @@ class Enterprise(EnterpriseBase):
             INST.created = datetime.strptime(profile.get('created'), "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
+        INST.networkId = profile.get('networkId')
+        INST.gatewayPoolId = profile.get('gatewayPoolId')
+        INST.alertsEnabled = tinyint(int(profile.get('alertsEnabled')))
+        INST.operatorAlertsEnabled = tinyint(int(profile.get('operatorAlertsEnabled')))
+        INST.endpointPkiMode = endpointPkiMode(profile.get('endpointPkiMode'))
         INST.name = profile.get('name')
+        INST.domain = profile.get('domain')
+        INST.prefix = profile.get('prefix')
         INST.logicalId = profile.get('logicalId')
+        INST.accountNumber = profile.get('accountNumber')
+        INST.description = profile.get('description')
         INST.contactName = profile.get('contactName')
         INST.contactPhone = profile.get('contactPhone')
         INST.contactMobile = profile.get('contactMobile')
@@ -265,23 +144,10 @@ class Enterprise(EnterpriseBase):
         INST.lon = profile.get('lon')
         INST.timezone = profile.get('timezone')
         INST.locale = profile.get('locale')
-        INST.shippingSameAsLocation = profile.get('shippingSameAsLocation')
-        INST.shippingContactName = profile.get('shippingContactName')
-        INST.shippingAddress = profile.get('shippingAddress')
-        INST.shippingAddress2 = profile.get('shippingAddress2')
-        INST.shippingCity = profile.get('shippingCity')
-        INST.shippingState = profile.get('shippingState')
-        INST.shippingCountry = profile.get('shippingCountry')
-        INST.shippingPostalCode = profile.get('shippingPostalCode')
         try:
             INST.modified = datetime.strptime(profile.get('modified'), "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             pass
-        INST.gatewayPoolId = profile.get('gatewayPoolId')
-        INST.networkId = profile.get('networkId')
-        INST.returnData = profile.get('returnData')
-        INST.user = AuthObject.from_dict(profile.get('user'))
-
         return INST
 
     @staticmethod

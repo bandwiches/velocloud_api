@@ -1,5 +1,6 @@
 # DEV
 __pycache__/
+*.pyc
 *.log
 *.logs
 .vscode/

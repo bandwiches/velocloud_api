@@ -1,34 +1,29 @@
 from dataclasses import dataclass, field
 from typing import List
-
-
-@dataclass
-class ValidationErrorDetails:
-    code: str = None
-    message: str = None
-    path: str = None
-
-    def __iter__(self):
-        return iter([self.code, self.message, self.path])
+from velocloud.models.validation_error_details import ValidationErrorDetails
 
 
 @dataclass
 class ErrorData:
     """Error Data
-
-    - if included in the response.
+    This is a custom class.
     """
-    valid: bool
-    error: List[ValidationErrorDetails] = field(default_factory=ValidationErrorDetails)
-    warning: List[ValidationErrorDetails] = field(default_factory=ValidationErrorDetails)
+    valid: bool = None
+    error: List[ValidationErrorDetails] = field(default_factory=list)
+    warning: List[ValidationErrorDetails] = field(default_factory=list)
+
+
+@dataclass
+class ErrorObject:
+    """Error Object
+    This is a custom class.
+    """
+    code: int  # http://www.jsonrpc.org/specification#error_object
+    message: str
+    data: ErrorData = None
 
 
 @dataclass
 class Error:
-    """Error (Base Class)
-
-    - data is not always included.
-    """
-    code: int
-    message: str
-    data: ErrorData = None
+    """Error"""
+    error: ErrorObject
