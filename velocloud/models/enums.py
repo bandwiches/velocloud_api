@@ -1,6 +1,22 @@
 from enum import Enum
 
 
+class apiSortingType(Enum):
+    """API Sorting - Type"""
+    ASC = "ASC"
+    DESC = "DESC"
+
+
+class basicMetric(Enum):
+    """Basic Metric"""
+    packetsRx = "packetsRx"
+    packetsTx = "packetsTx"
+    totalPackets = "totalPackets"
+    bytesRx = "bytesRx"
+    bytesTx = "bytesTx"
+    totalBytes = "totalBytes"
+
+
 class bgpFilterRuleAction(Enum):
     """BGP Filter Rule Action"""
     PERMIT = "PERMIT"
@@ -26,6 +42,20 @@ class BgpNeighborTag(Enum):
     UPLINK = "UPLINK"
 
 
+class bgpPeerStatusState(Enum):
+    """BGP Peer Status State"""
+    IDLE = "IDLE"
+    CONNECT = "CONNECT"
+    ACTIVE = "ACTIVE"
+    OPENSENT = "OPENSENT"
+    OPENCONFIRM = "OPENCONFIRM"
+    ESTABLISHED = "ESTABLISHED"
+    CLEARING = "CLEARING"
+    IDLEADMIN = "IDLEADMIN"
+    IDLEPRFXCT = "IDLEPRFXCT"
+    REMOVED = "REMOVED"
+
+
 class cellularNetwork(Enum):
     """Cellular Network"""
     ATT = "ATT"
@@ -38,6 +68,12 @@ class cloudSecurityTunnelingProtocol(Enum):
     """Cloud Security Tunneling Protocol"""
     GRE = "GRE"
     IPSEC = "IPSEC"
+
+
+class configurationModelType(Enum):
+    """Configuration Model Type"""
+    NETWORK_BASED = "NETWORK_BASED"
+    SEGMENT_BASED = "SEGMENT_BASED"
 
 
 class configurationModuleName(Enum):
@@ -66,6 +102,15 @@ class configurationModuleSegmentType(Enum):
     REGULAR = "REGULAR"
     CDE = "CDE"
     PRIVATE = "PRIVATE"
+
+
+class configurationOptionsList(Enum):
+    """Configuration Options List"""
+    modules = "modules"
+    edgeCount = "edgeCount"
+    enterprises = "enterprises"
+    enterpriseCount = "enterpriseCount"
+    counts = "counts"
 
 
 class deviceSettingsMulticastPimType(Enum):
@@ -198,6 +243,147 @@ class deviceSettingsWanOverlay(Enum):
     USER_DEFINED = "USER_DEFINED"
 
 
+class disasterRecoveryClientType(Enum):
+    """Disaster Recovery - Client Type"""
+    EDGE = "EDGE"
+    GATEWAY = "GATEWAY"
+
+
+class disasterRecoveryRole(Enum):
+    """Disaster Recovery - Role"""
+    STANDALONE = "STANDALONE"
+    ACTIVE = "ACTIVE"
+    STANDBY = "STANDBY"
+    ZOMBIE = "ZOMBIE"
+
+
+class disasterRecoveryState(Enum):
+    """Disaster Recovery - State"""
+    UNCONFIGURED = "UNCONFIGURED"
+    ACTIVE_CONFIGURING = "ACTIVE_CONFIGURING"
+    ACTIVE_CONFIGURED = "ACTIVE_CONFIGURED"
+    ACTIVE_UNCONFIG = "ACTIVE_UNCONFIG"
+    LAUNCHING_STANDBY = "LAUNCHING_STANDBY"
+    LAUNCHED_STANDBY = "LAUNCHED_STANDBY"
+    ACTIVE_WAIT_STANDBY = "ACTIVE_WAIT_STANDBY"
+    PENDING_STANDBY_CANDIDATE = "PENDING_STANDBY_CANDIDATE"
+    STANDBY_CANDIDATE = "STANDBY_CANDIDATE"
+    STANDBY_CONFIG_RQST = "STANDBY_CONFIG_RQST"
+    STANDBY_CONFIGURING = "STANDBY_CONFIGURING"
+    STANDBY_CONFIGURED = "STANDBY_CONFIGURED"
+    PENDING_STANDBY_UNCONFIG = "PENDING_STANDBY_UNCONFIG"
+    STANDBY_UNCONFIG = "STANDBY_UNCONFIG"
+    PENDING_STANDBY_PROMOTION = "PENDING_STANDBY_PROMOTION"
+    STANDBY_PROMOTED = "STANDBY_PROMOTED"
+    PENDING_ACTIVE_DEMOTION = "PENDING_ACTIVE_DEMOTION"
+    COPYING_DB = "COPYING_DB"
+    COPY_DB_DONE = "COPY_DB_DONE"
+    COPYING_FILES = "COPYING_FILES"
+    COPY_FILES_DONE = "COPY_FILES_DONE"
+    SYNC_CONFIGURING = "SYNC_CONFIGURING"
+    STANDBY_SYNC = "STANDBY_SYNC"
+    STANDBY_BACKGROUND_IMPORT = "STANDBY_BACKGROUND_IMPORT"
+    STANDBY_BACKGROUND_IMPORT_DONE = "STANDBY_BACKGROUND_IMPORT_DONE"
+    STANDBY_DATA_MIGRATION = "STANDBY_DATA_MIGRATION"
+    STANDBY_DATA_MIGRATION_DONE = "STANDBY_DATA_MIGRATION_DONE"
+    STANDBY_DATA_MIGRATION_IN_PROGRESS = "STANDBY_DATA_MIGRATION_IN_PROGRESS"
+    STANDBY_RUNNING = "STANDBY_RUNNING"
+    UPGRADING = "UPGRADING"
+    FAILURE_ACTIVE_CONFIGURING = "FAILURE_ACTIVE_CONFIGURING"
+    FAILURE_LAUNCHING_STANDBY = "FAILURE_LAUNCHING_STANDBY"
+    FAILURE_STANDBY_CONFIGURING = "FAILURE_STANDBY_CONFIGURING"
+    FAILURE_GET_STANDBY_CONFIG = "FAILURE_GET_STANDBY_CONFIG"
+    FAILURE_COPYING_DB = "FAILURE_COPYING_DB"
+    FAILURE_COPYING_FILES = "FAILURE_COPYING_FILES"
+    FAILURE_SYNC_CONFIGURING = "FAILURE_SYNC_CONFIGURING"
+    FAILURE_BACKGROUND_IMPORT = "FAILURE_BACKGROUND_IMPORT"
+    FAILURE_DATA_MIGRATION = "FAILURE_DATA_MIGRATION"
+    FAILURE_SYNCING_FILES = "FAILURE_SYNCING_FILES"
+    FAILURE_GET_STANDBY_STATUS = "FAILURE_GET_STANDBY_STATUS"
+    FAILURE_GET_ACTIVE_STATUS = "FAILURE_GET_ACTIVE_STATUS"
+    FAILURE_MYSQL_ACTIVE_STATUS = "FAILURE_MYSQL_ACTIVE_STATUS"
+    FAILURE_MYSQL_STANDBY_STATUS = "FAILURE_MYSQL_STANDBY_STATUS"
+    FAILURE_STANDBY_CANDIDATE = "FAILURE_STANDBY_CANDIDATE"
+    FAILURE_STANDBY_UNCONFIG = "FAILURE_STANDBY_UNCONFIG"
+    FAILURE_STANDBY_PROMOTION = "FAILURE_STANDBY_PROMOTION"
+    FAILURE_ACTIVE_DEMOTION = "FAILURE_ACTIVE_DEMOTION"
+
+
+class edgeActivationState(Enum):
+    """Edge Activation State"""
+    UNASSIGNED = "UNASSIGNED"
+    PENDING = "PENDING"
+    ACTIVATED = "ACTIVATED"
+    REACTIVATION_PENDING = "REACTIVATION_PENDING"
+
+
+class edgeHaState(Enum):
+    """Edge HA State"""
+    UNCONFIGURED = "UNCONFIGURED"
+    PENDING_INIT = "PENDING_INIT"
+    PENDING_CONFIRMATION = "PENDING_CONFIRMATION"
+    PENDING_CONFIRMED = "PENDING_CONFIRMED"
+    PENDING_DISSOCIATION = "PENDING_DISSOCIATION"
+    READY = "READY"
+    FAILED = "FAILED"
+
+
+class edgeServiceState(Enum):
+    """Edge Service State"""
+    IN_SERVICE = "IN_SERVICE"
+    OUT_OF_SERVICE = "OUT_OF_SERVICE"
+    PENDING_SERVICE = "PENDING_SERVICE"
+
+
+class edgeState(Enum):
+    """Edge State"""
+    NEVER_ACTIVATED = "NEVER_ACTIVATED"
+    DEGRADED = "DEGRADED"
+    OFFLINE = "OFFLINE"
+    DISABLED = "DISABLED"
+    EXPIRED = "EXPIRED"
+    CONNECTED = "CONNECTED"
+
+
+class edgeLinkMetric(Enum):
+    """Edge Link Metric"""
+    bytesRx = "bytesRx"
+    bytesTx = "bytesTx"
+    totalBytes = "totalBytes"
+    totalPackets = "totalPackets"
+    p1BytesRx = "p1BytesRx"
+    p1BytesTx = "p1BytesTx"
+    p1PacketsRx = "p1PacketsRx"
+    p1PacketsTx = "p1PacketsTx"
+    p2BytesRx = "p2BytesRx"
+    p2BytesTx = "p2BytesTx"
+    p2PacketsRx = "p2PacketsRx"
+    p2PacketsTx = "p2PacketsTx"
+    p3BytesRx = "p3BytesRx"
+    p3BytesTx = "p3BytesTx"
+    p3PacketsRx = "p3PacketsRx"
+    p3PacketsTx = "p3PacketsTx"
+    packetsRx = "packetsRx"
+    packetsTx = "packetsTx"
+    controlBytesRx = "controlBytesRx"
+    controlBytesTx = "controlBytesTx"
+    controlPacketsRx = "controlPacketsRx"
+    controlPacketsTx = "controlPacketsTx"
+    bestBwKbpsRx = "bestBwKbpsRx"
+    bestBwKbpsTx = "bestBwKbpsTx"
+    bestJitterMsRx = "bestJitterMsRx"
+    bestJitterMsTx = "bestJitterMsTx"
+    bestLatencyMsRx = "bestLatencyMsRx"
+    bestLatencyMsTx = "bestLatencyMsTx"
+    bestLossPctRx = "bestLossPctRx"
+    bestLossPctTx = "bestLossPctTx"
+    bpsOfBestPathRx = "bpsOfBestPathRx"
+    bpsOfBestPathTx = "bpsOfBestPathTx"
+    signalStrength = "signalStrength"
+    scoreTx = "scoreTx"
+    scoreRx = "scoreRx"
+
+
 class gwDisplayTimeUnit(Enum):
     """Display Time Unit"""
     DAY = "DAY"
@@ -261,9 +447,17 @@ class lanVisibilityMode(Enum):
 
 class endpointPkiMode(Enum):
     """endpointPkiMode"""
-    CERTIFICATE_DISABLED: "CERTIFICATE_DISABLED"
-    CERTIFICATE_OPTIONAL: "CERTIFICATE_OPTIONAL"
-    CERTIFICATE_REQUIRED: "CERTIFICATE_REQUIRED"
+    CERTIFICATE_DISABLED = "CERTIFICATE_DISABLED"
+    CERTIFICATE_OPTIONAL = "CERTIFICATE_OPTIONAL"
+    CERTIFICATE_REQUIRED = "CERTIFICATE_REQUIRED"
+
+
+class enterpriseAddressEntity(Enum):
+    """Enterprise Address Entity"""
+    ACTIVE_VCO = "ACTIVE_VCO"
+    STANDBY_VCO = "STANDBY_VCO"
+    GATEWAY = "GATEWAY"
+    DATACENTER = "DATACENTER"
 
 
 class enterpriseAlertDefinitionNameAndType(Enum):
@@ -302,6 +496,19 @@ class enterpriseAlertTriggerState(Enum):
     PENDING = "PENDING"
     ACTIVE = "ACTIVE"
     CLOSED = "CLOSED"
+
+
+class enterpriseAnalyticsCapability(Enum):
+    """Enterprise Analytics Capability"""
+    NONE = "NONE"
+    APPLICATION_BRANCH = "APPLICATION_BRANCH"
+
+
+class enterpriseConfigurationFirewallState(Enum):
+    """Enterprise Configuration Firewall State"""
+    none = "none"
+    enabled = "enabled"
+    disabled = "disabled"
 
 
 class enterpriseNetworkSpaceMode(Enum):
@@ -369,6 +576,13 @@ class gatewayPoolHandoffType(Enum):
     NONE = "NONE"
     ALLOW = "ALLOW"
     ONLY = "ONLY"
+
+
+class haType(Enum):
+    """HA Type"""
+    ACTIVE_ACTIVE = "ACTIVE_ACTIVE"
+    ACTIVE_STANDBY = "ACTIVE_STANDBY"
+    VRRP = "VRRP"
 
 
 class linkBackupState(Enum):
@@ -487,6 +701,13 @@ class netflowFilterRuleType(Enum):
     netmask = "netmask"
 
 
+class operatorModuleType(Enum):
+    """Operator Module Type"""
+    ENTERPRISE = "ENTERPRISE"
+    OPERATOR = "OPERATOR"
+    GATEWAY = "GATEWAY"
+
+
 class routedInterfaceAddressingType(Enum):
     """Routed Interfaces Addressing Type"""
     DHCP = "DHCP"
@@ -563,7 +784,7 @@ class wanDataLinkMode(Enum):
 class wanDataLinkType(Enum):
     """WAN Data - Link Type"""
     WIRED = "WIRED"
-    WIRELESS = "WIRELESS"
+    WIRELESS = "WIRELESS "
 
 
 class edgeDeviceSettingsWanOverlay(Enum):

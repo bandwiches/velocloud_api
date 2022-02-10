@@ -1,91 +1,21 @@
-from dataclasses import dataclass, field
-from datetime import datetime
-from typing import List
-
-
-""" ENUMS """
-
-
-""" DATACLASSES """
-
-
-@dataclass
-class ApplicationMetadataUploadDetails:
-    size: int
-
-    def __repr__(self):
-        return str(type(self))
-
-
-@dataclass
-class ApplicationMetadataManifest:
-    description: str
-    name: str
-    version: str
-
-    def __repr__(self):
-        return str(type(self))
-
-
-@dataclass
-class ApplicationMetadata:
-    blobId: int
-    created: datetime
-    description: str
-    fileName: str
-    _id: int
-    logicalId: str
-    manifest: ApplicationMetadataManifest
-    modified: datetime
-    name: str
-    networkId: int
-    type: str
-    uploadDetails: ApplicationMetadataUploadDetails
-    version: str
-
-    def __repr__(self):
-        return str(type(self))
-
-    @property
-    def app_metadata_id(self):
-        return self._id
-
-
-@dataclass
-class IpPortMapping:
-    subnets: List[str] = field(default_factory=list)
-    tcpPorts: List[int] = field(default_factory=list)
-    udpPorts: List[int] = field(default_factory=list)
-
-    def __repr__(self):
-        return str(type(self))
-
-
-@dataclass
-class ProtocolPortMapping:
-    tcpPorts: List[int] = field(default_factory=list)
-    udpPorts: List[int] = field(default_factory=list)
-
-    def __repr__(self):
-        return str(type(self))
+from dataclasses import dataclass
+from velocloud.models.ip_port_mapping import IpPortMapping
+from velocloud.models.protocol_port_mapping import ProtocolPortMapping
 
 
 @dataclass
 class Application:
-    _id: int
-    _class: int
+    """Application"""
+    _class: int  # Better way to do this?
     description: str
     displayName: str
+    id: int
     knownIpPortMapping: IpPortMapping
     protocolPortMapping: ProtocolPortMapping
     name: str = None
 
     def __repr__(self):
         return str(type(self))
-
-    @property
-    def app_id(self):
-        return self._id
 
     @property
     def app_class(self):
