@@ -17,6 +17,12 @@ class basicMetric(Enum):
     totalBytes = "totalBytes"
 
 
+class bgpCommunityMappingPriorityMode(Enum):
+    """BGP Community Mapping Priority Mode"""
+    ALL_SEGMENTS = "ALL_SEGMENTS"
+    PER_SEGMENT = "PER_SEGMENT"
+
+
 class bgpFilterRuleAction(Enum):
     """BGP Filter Rule Action"""
     PERMIT = "PERMIT"
@@ -511,9 +517,38 @@ class enterpriseConfigurationFirewallState(Enum):
     disabled = "disabled"
 
 
+class enterpriseGatewayState(Enum):
+    """Enterprise Gateway State"""
+    NEVER_ACTIVATED = "NEVER_ACTIVATED"
+    DEGRADED = "DEGRADED"
+    QUIESCED = "QUIESCED"
+    DISABLED = "DISABLED"
+    OUT_OF_SERVICE = "OUT_OF_SERVICE"
+    CONNECTED = "CONNECTED"
+    OFFLINE = "OFFLINE"
+
+
+class enterpriseGatewayType(Enum):
+    """Enterprise Gateway Type"""
+    OTHER = "OTHER"
+    SUPER = "SUPER"
+    DATACENTER = "DATACENTER"
+    HANDOFF = "HANDOFF"
+    SUPER_ALT = "SUPER_ALT"
+
+
 class enterpriseNetworkSpaceMode(Enum):
     static = "static"
     dynamic = "dynamic"
+
+
+class enterprisePropertyDataType(Enum):
+    STRING = "STRING"
+    NUMBER = "NUMBER"
+    BOOLEAN = "BOOLEAN"
+    JSON = "JSON"
+    DATE = "DATE"
+    DATETIME = "DATETIME"
 
 
 class enterpriseProxyType(Enum):
@@ -576,6 +611,32 @@ class gatewayPoolHandoffType(Enum):
     NONE = "NONE"
     ALLOW = "ALLOW"
     ONLY = "ONLY"
+
+
+class gatewayHandoffValueType(Enum):
+    """Gateway Handoff Value Segment Type"""
+    NONE = "NONE"
+    DOT1Q = "802.1Q"
+    DOT1AD = "802.1ad"
+    QinQ9100 = "QinQ (0x9100)"
+    QinQ8100 = "QinQ (0x8100)"
+
+
+class gatewayRole(Enum):
+    """Gateway Role"""
+    DATA_PLANE = "DATA_PLANE"
+    CONTROL_PLANE = "CONTROL_PLANE"
+    VPN_TUNNEL = "VPN_TUNNEL"
+    ON_PREMISE = "ON_PREMISE"
+    CDE = "CDE"
+
+
+class gatewayServiceState(Enum):
+    """Gateway Service State"""
+    IN_SERVICE = "IN_SERVICE"
+    OUT_OF_SERVICE = "OUT_OF_SERVICE"
+    PENDING_SERVICE = "PENDING_SERVICE"
+    QUIESCED = "QUIESCED"
 
 
 class haType(Enum):
@@ -735,6 +796,62 @@ class ruleType(Enum):
     prefix = "prefix"
     wildcard = "wildcard"
     netmask = "netmask"
+
+
+class timeSeriesMetric(Enum):
+    """Time Series Metric"""
+    bytesRx = "bytesRx"
+    bytesTx = "bytesTx"
+    totalBytes = "totalBytes"
+    packetsRx = "packetsRx"
+    packetsTx = "packetsTx"
+    totalPackets = "totalPackets"
+    p1BytesRx = "p1BytesRx"
+    p1BytesTx = "p1BytesTx"
+    p1PacketsRx = "p1PacketsRx"
+    p1PacketsTx = "p1PacketsTx"
+    p2BytesRx = "p2BytesRx"
+    p2BytesTx = "p2BytesTx"
+    p2PacketsRx = "p2PacketsRx"
+    p2PacketsTx = "p2PacketsTx"
+    p3BytesRx = "p3BytesRx"
+    p3BytesTx = "p3BytesTx"
+    p3PacketsRx = "p3PacketsRx"
+    p3PacketsTx = "p3PacketsTx"
+    controlBytesRx = "controlBytesRx"
+    controlBytesTx = "controlBytesTx"
+    controlPacketsRx = "controlPacketsRx"
+    controlPacketsTx = "controlPacketsTx"
+    bpsRx = "bpsRx"
+    bpsRxMin = "bpsRxMin"
+    bpsRxMax = "bpsRxMax"
+    bpsTx = "bpsTx"
+    bpsTxMin = "bpsTxMin"
+    bpsTxMax = "bpsTxMax"
+    latencyRx = "latencyRx"
+    latencyRxMin = "latencyRxMin"
+    latencyRxMax = "latencyRxMax"
+    latencyTx = "latencyTx"
+    latencyTxMin = "latencyTxMin"
+    latencyTxMax = "latencyTxMax"
+    jitterRx = "jitterRx"
+    jitterRxMin = "jitterRxMin"
+    jitterRxMax = "jitterRxMax"
+    jitterTx = "jitterTx"
+    jitterTxMin = "jitterTxMin"
+    jitterTxMax = "jitterTxMax"
+    packetLossRx = "packetLossRx"
+    packetLossRxMin = "packetLossRxMin"
+    packetLossRxMax = "packetLossRxMax"
+    packetLossTx = "packetLossTx"
+    packetLossTxMin = "packetLossTxMin"
+    packetLossTxMax = "packetLossTxMax"
+    scoreBeforeVoice = "scoreBeforeVoice"
+    scoreBeforeVideo = "scoreBeforeVideo"
+    scoreBeforeTrans = "scoreBeforeTrans"
+    scoreAfterVoice = "scoreAfterVoice"
+    scoreAfterVideo = "scoreAfterVideo"
+    scoreAfterTrans = "scoreAfterTrans"
 
 
 class tinyint(Enum):
